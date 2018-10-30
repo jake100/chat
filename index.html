@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Chat</title>
+
+	  <style>
+			* { margin: 0; padding: 0; box-sizing: border-box; }
+			body { font: 12px Helvetica, Arial; }
+			form { background: #000; padding: 30px; position: fixed; bottom: 0; width: 100%; }
+			form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; border-radius: 12px;}
+			form button { width: 9%; background: rgb(222, 22, 22); border: none; padding: 10px; border: 2px solid #999999;}
+			#message { list-style-type: none; margin: 50; padding: 50; }
+			#message li { padding: 0px 0px; }
+			#message li:nth-child(odd) { background: #eee; }
+			#message { margin-bottom: 50px; margin-top: 50; width: 100%; height: 500px; overflow-x:none; overflow-y:auto;}
+			#con {position: fixed; left: 0; top: 0; width: 100%; }
+			#footer {position: fixed; color: #eee;
+    bottom: 0;
+    width: 100%;
+}
+	
+		</style>
+   </head>
+   <script src = "/socket.io/socket.io.js"></script>
+   
+   <script>
+
+   
+      var socket = io();
+	  
+	  	io.on('connection', function(socket){
+			socket.on('message', function(msg){
+			io.emit('message', msg);
+			});
+		});
+   </script>
+   <body>
+	   	<div id="con">
+
+			<ul id="message"></ul>
+			 
+		</div>
+		<form action="">
+	  
+				<input id="m" autocomplete="off" /><button>Send</button>
+			</form>
+			<div id="footer">
+					<input id="checkBox" type="checkbox"  html="make green">
+					<label id="check">green text</label>
+		
+					<input id="stopCheckBox" type="checkbox"  html="stop">
+					<label id="stopCheck">stop</label>
+
+			</div>
+			
+
+	  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+	  <script>
+	  		var checkBox = document.getElementById("checkBox");
+			var isGreen = checkBox.checked;
+			
+		socket.emit('getColor', isGreen);
+      $(function () {
+        var socket = io();
+        $('form').submit(function(){
+			var checkBox = document.getElementById("checkBox");
+			var isGreen = checkBox.checked;
+			socket.emit('message', $('#m').val());
+			socket.emit('getColor', isGreen);
+
+			$('#m').val('');
+			window.setInterval(function() {
+  			var elem = document.getElementById('message');
+ 			 elem.scrollTop = elem.scrollHeight;
+			}, 2000);
+			return false;
+        });
+        socket.on('message', function(msg){
+			var patt = /(.{1,})\1{2,}/;
+    		var isFalse = patt.test(msg);
+			if(msg.length > 144 || msg.length == 0 || isFalse || msg === " " || msg === "  ")return;
+			var checkBox = document.getElementById("checkBox");
+			var isGreen = checkBox.checked;
+			console.log(isGreen);
+			var list = $('<li>');
+
+			var stopCheckBox = document.getElementById("stopCheckBox");
+			var stopped = stopCheckBox.checked;
+			if(!stopped)$('#message').append(list.text(msg));
+
+			window.scrollTo(0, document.body.scrollHeight);
+			if(isGreen)$( "li" ).last().css("color", "green" );
+        });
+		    socket.on('getColor', function(isGreen){
+			var list = $('<li>');
+			if(isGreen)$( "li" ).last().css("color", "green" );
+        });
+      });
+    </script>
+   </body>
+</html>
